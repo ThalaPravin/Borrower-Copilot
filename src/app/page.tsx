@@ -1,69 +1,202 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import React, { useState } from "react";
+import { Navbar } from "@/components/app-shell/navbar";
+import { QuestionnaireForm } from "@/components/questionnaire/questionnaire-form";
+import { ResultsOverview } from "@/components/results/results-overview";
+import { BorrowerInputs, AssessmentResult } from "@/features/borrower-assessment/types";
+import { calculateAssessment } from "@/features/borrower-assessment/assessment";
+import { SAMPLE_BORROWERS } from "@/data/sample-borrowers";
+import { Sparkles, ArrowRight, ShieldCheck, Scale, Percent, Calendar } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { motion, AnimatePresence } from "framer-motion";
+
+export default function HomePage() {
+  const [inputs, setInputs] = useState<BorrowerInputs>(SAMPLE_BORROWERS.priya.inputs);
+  const [assessmentResult, setAssessmentResult] = useState<AssessmentResult | null>(null);
+  const [viewState, setViewState] = useState<"hero" | "form" | "results">("hero");
+
+  const handleStartQuestionnaire = () => {
+    setViewState("form");
+  };
+
+  const handleCalculate = (finalInputs: BorrowerInputs) => {
+    setInputs(finalInputs);
+    const result = calculateAssessment(finalInputs);
+    setAssessmentResult(result);
+    setViewState("results");
+  };
+
+  const handleReset = () => {
+    setAssessmentResult(null);
+    setViewState("form");
+  };
+
+  const handlePrefillSample = (key: "priya" | "ravi" | "anita") => {
+    const sample = SAMPLE_BORROWERS[key];
+    setInputs(sample.inputs);
+  };
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+    <div className="min-h-screen flex flex-col transition-colors">
+      <Navbar
+        onResetAssessment={handleReset}
+        activeView={viewState === "results" ? "results" : "form"}
+      />
+
+      <div className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 md:py-10">
+        <AnimatePresence mode="wait">
+          {/* Landing Hero View */}
+          {viewState === "hero" && (
+            <motion.div
+              key="hero-view"
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.35 }}
+              className="space-y-12 max-w-4xl mx-auto py-6"
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+              {/* Hero Header */}
+              <div className="text-center space-y-6">
+                <motion.div
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ delay: 0.1 }}
+                  className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 dark:bg-emerald-950/60 border border-emerald-500/30 text-emerald-700 dark:text-emerald-400 text-xs font-bold uppercase tracking-wider"
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>Before You Walk Into a Lender&apos;s Office</span>
+                </motion.div>
+
+                <h1 className="text-3xl sm:text-5xl font-black text-slate-900 dark:text-white tracking-tight leading-tight font-heading">
+                  Be the most informed person in the room.
+                </h1>
+
+                <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 max-w-2xl mx-auto leading-relaxed font-medium">
+                  Borrower Copilot is an independent financial self-assessment tool. Answer four critical questions before approaching any bank or loan app officer.
+                </p>
+
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 pt-2">
+                  <Button
+                    variant="primary"
+                    size="lg"
+                    onClick={handleStartQuestionnaire}
+                    className="bg-emerald-600 hover:bg-emerald-500 text-base font-bold px-8 shadow-lg shadow-emerald-600/20"
+                  >
+                    <span>Start Self-Assessment</span>
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    onClick={() => {
+                      handleCalculate(SAMPLE_BORROWERS.priya.inputs);
+                    }}
+                    className="text-base"
+                  >
+                    <Sparkles className="w-4 h-4 mr-2 text-emerald-500" />
+                    <span>Try Sample Demo (Priya)</span>
+                  </Button>
+                </div>
+              </div>
+
+              {/* 4 Core Questions Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
+                <motion.div
+                  whileHover={{ y: -3 }}
+                  className="p-6 rounded-2xl bg-white/90 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 space-y-2 shadow-sm transition-all"
+                >
+                  <div className="flex items-center gap-2 text-xs uppercase font-extrabold text-emerald-600 dark:text-emerald-400">
+                    <ShieldCheck className="w-4 h-4" />
+                    <span>Question 1</span>
+                  </div>
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white font-heading">Should I borrow at all?</h3>
+                  <p className="text-xs text-slate-600 dark:text-slate-400">
+                    Calculates whether borrowing fits your uncommitted cashflow or if you should borrow less / delay.
+                  </p>
+                </motion.div>
+
+                <motion.div
+                  whileHover={{ y: -3 }}
+                  className="p-6 rounded-2xl bg-white/90 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 space-y-2 shadow-sm transition-all"
+                >
+                  <div className="flex items-center gap-2 text-xs uppercase font-extrabold text-emerald-600 dark:text-emerald-400">
+                    <Scale className="w-4 h-4" />
+                    <span>Question 2</span>
+                  </div>
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white font-heading">How much am I really eligible for?</h3>
+                  <p className="text-xs text-slate-600 dark:text-slate-400">
+                    Contrasts loose lender sanction limits with your borrower-safe borrowing ceiling.
+                  </p>
+                </motion.div>
+
+                <motion.div
+                  whileHover={{ y: -3 }}
+                  className="p-6 rounded-2xl bg-white/90 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 space-y-2 shadow-sm transition-all"
+                >
+                  <div className="flex items-center gap-2 text-xs uppercase font-extrabold text-emerald-600 dark:text-emerald-400">
+                    <Percent className="w-4 h-4" />
+                    <span>Question 3</span>
+                  </div>
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white font-heading">What is a fair interest rate for me?</h3>
+                  <p className="text-xs text-slate-600 dark:text-slate-400">
+                    Estimates a fair benchmark interest rate band & computes true All-in APR including processing fees.
+                  </p>
+                </motion.div>
+
+                <motion.div
+                  whileHover={{ y: -3 }}
+                  className="p-6 rounded-2xl bg-white/90 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 space-y-2 shadow-sm transition-all"
+                >
+                  <div className="flex items-center gap-2 text-xs uppercase font-extrabold text-emerald-600 dark:text-emerald-400">
+                    <Calendar className="w-4 h-4" />
+                    <span>Question 4</span>
+                  </div>
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white font-heading">What EMI should I agree to?</h3>
+                  <p className="text-xs text-slate-600 dark:text-slate-400">
+                    Establishes a safe EMI ceiling, evaluates 3yr vs 5yr tenure trade-offs, and stress tests income shocks.
+                  </p>
+                </motion.div>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Questionnaire Form View */}
+          {viewState === "form" && (
+            <motion.div
+              key="form-view"
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.3 }}
             >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+              <QuestionnaireForm
+                initialInputs={inputs}
+                onSubmit={handleCalculate}
+                onPrefillSample={handlePrefillSample}
+              />
+            </motion.div>
+          )}
+
+          {/* Results Overview View */}
+          {viewState === "results" && assessmentResult && (
+            <motion.div
+              key="results-view"
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.3 }}
+            >
+              <ResultsOverview
+                inputs={inputs}
+                result={assessmentResult}
+                onEditAnswers={() => setViewState("form")}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </div>
   );
 }
