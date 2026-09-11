@@ -43,3 +43,8 @@ next-env.d.ts
 # scratch
 /scratch
 
+# agent config files
+AGENTS.md
+CLAUDE.md
+
+
