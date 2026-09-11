@@ -10,6 +10,7 @@ import { Step4Credit } from "./step-4-credit";
 import { Step5Offer } from "./step-5-offer";
 import { Button } from "../ui/button";
 import { Progress } from "../ui/progress";
+import { SpotlightCard } from "../ui/spotlight-card";
 import { ArrowRight, ArrowLeft, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -59,7 +60,7 @@ export function QuestionnaireForm({ initialInputs, onSubmit, onPrefillSample }: 
   return (
     <div className="w-full max-w-3xl mx-auto space-y-6">
       {/* Sample Borrowers Quick Selector Bar */}
-      <div className="p-4 rounded-2xl bg-white/90 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
+      <SpotlightCard className="p-4 bg-white/90 dark:bg-slate-900/90 border-slate-200 dark:border-slate-800">
         <div className="flex items-center justify-between gap-2 mb-3">
           <div className="flex items-center gap-2 text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
             <Sparkles className="w-3.5 h-3.5" />
@@ -107,10 +108,10 @@ export function QuestionnaireForm({ initialInputs, onSubmit, onPrefillSample }: 
             <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">₹28k Income • Bounced EMI • ₹1.5L EV</div>
           </motion.button>
         </div>
-      </div>
+      </SpotlightCard>
 
-      {/* Main Questionnaire Card */}
-      <div className="rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 p-6 md:p-8 shadow-xl backdrop-blur-sm space-y-6 transition-colors">
+      {/* Main Questionnaire Card with Spotlight Effect */}
+      <SpotlightCard className="p-6 md:p-8 space-y-6">
         {/* Progress indicator */}
         <div className="space-y-2">
           <div className="flex items-center justify-between text-xs font-semibold text-slate-500 dark:text-slate-400">
@@ -163,7 +164,7 @@ export function QuestionnaireForm({ initialInputs, onSubmit, onPrefillSample }: 
             )}
           </Button>
         </div>
-      </div>
+      </SpotlightCard>
     </div>
   );
 }
